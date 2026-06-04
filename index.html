@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مكتبة الروايات التفاعلية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #07070f;
+  --bg2:      #0c0c1a;
+  --surface:  #111122;
+  --surface2: #171730;
+  --border:   rgba(255,255,255,0.06);
+  --text:     #e2ddd6;
+  --muted:    #5a5570;
+  --accent:   #c8a05a;
+  --accent2:  #e8c87a;
+  --adim:     rgba(200,160,90,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* grain */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5;}
+
+/* orbs */
+.orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.06;animation:orbF ease-in-out infinite;}
+.o1{width:600px;height:600px;background:#c8a05a;top:-150px;right:-150px;animation-duration:20s;}
+.o2{width:450px;height:450px;background:#5a3a9a;bottom:-100px;left:-100px;animation-duration:25s;animation-delay:-9s;}
+.o3{width:350px;height:350px;background:#2a6a5a;top:45%;left:25%;animation-duration:17s;animation-delay:-5s;}
+@keyframes orbF{0%,100%{transform:translate(0,0)scale(1);}33%{transform:translate(25px,-18px)scale(1.04);}66%{transform:translate(-18px,25px)scale(.96);}}
+
+/* layout */
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 22px 90px;}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:64px 0 44px;animation:fadeD .8s ease both;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--adim);border:1px solid rgba(200,160,90,.2);border-radius:40px;padding:6px 20px;font-size:.7rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:22px;}
+.hero-title{font-family:'Amiri',serif;font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.25;margin-bottom:12px;}
+.hero-title span{color:var(--accent);text-shadow:0 0 40px rgba(200,160,90,.3);}
+.hero-desc{font-size:.97rem;color:var(--muted);max-width:500px;margin:0 auto 32px;line-height:1.9;font-weight:300;}
+.hero-nums{display:flex;justify-content:center;gap:44px;margin-bottom:44px;}
+.hnum{text-align:center;}
+.hnum-n{font-family:'Amiri',serif;font-size:2.1rem;color:var(--accent);display:block;transition:all .4s;}
+.hnum-l{font-size:.67rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.hero-line{display:flex;align-items:center;gap:14px;max-width:280px;margin:0 auto;opacity:.2;}
+.hero-line span{flex:1;height:1px;background:var(--accent);}
+
+/* ── SEARCH & FILTER ── */
+.controls{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;animation:fadeU .6s .15s ease both;}
+.sw{flex:1;min-width:200px;position:relative;}
+.si{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
+.search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 38px 11px 14px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.search::placeholder{color:var(--muted);}
+.search:focus{border-color:rgba(200,160,90,.35);box-shadow:0 0 0 3px rgba(200,160,90,.06);}
+.filters{display:flex;gap:7px;flex-wrap:wrap;}
+.fb{background:var(--surface);border:1px solid var(--border);border-radius:40px;padding:8px 16px;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.fb:hover{border-color:rgba(200,160,90,.3);color:var(--accent);}
+.fb.on{background:var(--adim);border-color:rgba(200,160,90,.4);color:var(--accent2);}
+
+/* ── SECTION HEAD ── */
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:22px;animation:fadeU .6s .2s ease both;}
+.sh h2{font-family:'Amiri',serif;font-size:1.35rem;font-weight:400;}
+.sh .ln{flex:1;height:1px;background:var(--border);}
+.sh .ct{font-size:.67rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* ── FEATURED ── */
+.featured{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:30px;display:grid;grid-template-columns:1fr 1fr;cursor:pointer;transition:transform .3s,box-shadow .3s;animation:fadeU .6s .25s ease both;text-decoration:none;color:inherit;}
+.featured:hover{transform:translateY(-4px);box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(200,160,90,.12);}
+.fart{position:relative;overflow:hidden;min-height:270px;}
+.fart svg{width:100%;height:100%;position:absolute;inset:0;}
+.fgrad{position:absolute;inset:0;background:linear-gradient(90deg,transparent 45%,var(--surface));pointer-events:none;}
+.fbadge{position:absolute;top:14px;right:14px;background:var(--accent);color:#000;border-radius:20px;padding:4px 12px;font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.finfo{padding:30px 26px;display:flex;flex-direction:column;justify-content:center;gap:12px;}
+.fgenre{font-size:.67rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;}
+.ftitle{font-family:'Amiri',serif;font-size:1.85rem;line-height:1.3;}
+.fdesc{font-size:.86rem;color:var(--muted);line-height:1.85;font-weight:300;}
+.fmeta{display:flex;gap:14px;flex-wrap:wrap;}
+.fmc{font-size:.73rem;color:var(--muted);}
+.fplay{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(200,160,90,.15),rgba(200,160,90,.07));border:1px solid rgba(200,160,90,.3);border-radius:10px;padding:10px 20px;color:var(--accent2);font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:600;transition:all .2s;width:fit-content;text-decoration:none;}
+.fplay:hover{background:rgba(200,160,90,.2);border-color:rgba(200,160,90,.5);transform:translateX(-3px);}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:18px;animation:fadeU .6s .3s ease both;}
+
+/* ── GAME CARD ── */
+.gc{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .3s;cursor:pointer;display:flex;flex-direction:column;text-decoration:none;color:inherit;position:relative;}
+.gc:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 1px rgba(200,160,90,.1);border-color:rgba(200,160,90,.14);}
+.gc.hide{display:none;}
+.cart{height:165px;position:relative;overflow:hidden;background:var(--bg2);}
+.cart svg{width:100%;height:100%;}
+.cag{position:absolute;inset:0;background:linear-gradient(transparent 40%,var(--surface));}
+.gtag{position:absolute;top:11px;right:11px;border-radius:20px;padding:3px 10px;font-size:.61rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;backdrop-filter:blur(6px);}
+.t-adv{background:rgba(200,160,90,.2);color:#e8c87a;border:1px solid rgba(200,160,90,.3);}
+.t-hor{background:rgba(139,0,0,.25);color:#ff7070;border:1px solid rgba(139,0,0,.4);}
+.t-mys{background:rgba(60,40,120,.3);color:#c0a0ff;border:1px solid rgba(100,70,180,.4);}
+.t-sci{background:rgba(20,60,120,.3);color:#70b8ff;border:1px solid rgba(30,80,160,.4);}
+.t-fan{background:rgba(20,80,60,.3);color:#70e0b0;border:1px solid rgba(30,120,80,.4);}
+.nbadge{position:absolute;top:11px;left:11px;background:var(--accent);color:#000;border-radius:20px;padding:2px 9px;font-size:.59rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.cbody{padding:16px 17px 18px;flex:1;display:flex;flex-direction:column;gap:7px;}
+.ctitle{font-family:'Amiri',serif;font-size:1.15rem;line-height:1.4;}
+.cdesc{font-size:.81rem;color:var(--muted);line-height:1.78;font-weight:300;flex:1;}
+.cfoot{display:flex;align-items:center;justify-content:space-between;margin-top:9px;padding-top:11px;border-top:1px solid var(--border);}
+.cmeta{display:flex;gap:10px;}
+.cmi{font-size:.71rem;color:var(--muted);display:flex;align-items:center;gap:3px;}
+.cplay{font-size:.77rem;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:4px;transition:gap .2s;}
+.gc:hover .cplay{gap:8px;}
+
+/* ── UPLOAD ZONE ── */
+.upload-section{margin-top:56px;animation:fadeU .6s .35s ease both;}
+.upload-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.upload-head{display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;user-select:none;}
+.upload-head:hover{background:rgba(255,255,255,.02);}
+.upload-head-left{display:flex;align-items:center;gap:12px;}
+.upload-head-icon{width:40px;height:40px;background:var(--adim);border:1px solid rgba(200,160,90,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.upload-head-text h3{font-size:.95rem;font-weight:600;color:var(--text);}
+.upload-head-text p{font-size:.74rem;color:var(--muted);margin-top:2px;}
+.upload-toggle{color:var(--muted);font-size:.9rem;transition:transform .3s;}
+.upload-toggle.open{transform:rotate(180deg);}
+.upload-body{display:none;padding:26px 28px 28px;}
+.upload-body.open{display:block;}
+
+/* drop zone */
+.dropzone{border:2px dashed rgba(200,160,90,.2);border-radius:14px;padding:40px 20px;text-align:center;transition:all .25s;cursor:pointer;position:relative;background:rgba(200,160,90,.02);}
+.dropzone:hover,.dropzone.drag{border-color:rgba(200,160,90,.5);background:rgba(200,160,90,.05);}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-icon{font-size:2.5rem;margin-bottom:10px;opacity:.5;}
+.dz-title{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:5px;}
+.dz-sub{font-size:.78rem;color:var(--muted);}
+.dz-sub span{color:var(--accent);font-weight:600;}
+
+/* upload form */
+.uform{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px;}
+.ufield{display:flex;flex-direction:column;gap:6px;}
+.ufield.full{grid-column:1/-1;}
+.ulabel{font-size:.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.uinput,.uselect,.utextarea{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;width:100%;}
+.uinput:focus,.uselect:focus,.utextarea:focus{border-color:rgba(200,160,90,.35);}
+.uselect option{background:var(--bg2);}
+.utextarea{resize:vertical;min-height:70px;}
+.uactions{display:flex;gap:10px;margin-top:6px;grid-column:1/-1;}
+.ubtn{flex:1;background:linear-gradient(135deg,rgba(200,160,90,.18),rgba(200,160,90,.08));border:1px solid rgba(200,160,90,.3);border-radius:10px;padding:12px 20px;color:var(--accent2);font-family:'Tajawal',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.ubtn:hover{background:rgba(200,160,90,.25);border-color:rgba(200,160,90,.5);transform:translateY(-1px);}
+.ubtn.cancel{background:transparent;border-color:var(--border);color:var(--muted);}
+.ubtn.cancel:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
+
+/* file preview */
+.file-preview{display:none;align-items:center;gap:12px;background:rgba(200,160,90,.06);border:1px solid rgba(200,160,90,.2);border-radius:10px;padding:12px 16px;margin-top:14px;}
+.file-preview.show{display:flex;}
+.fp-icon{font-size:1.4rem;flex-shrink:0;}
+.fp-info{flex:1;}
+.fp-name{font-size:.85rem;font-weight:600;color:var(--accent2);}
+.fp-size{font-size:.7rem;color:var(--muted);margin-top:2px;}
+.fp-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;transition:color .2s;}
+.fp-remove:hover{color:#ff6666;}
+
+/* coming soon */
+.coming{background:var(--surface);border:1px dashed rgba(255,255,255,.06);border-radius:16px;padding:30px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-height:190px;opacity:.45;}
+.co-icon{font-size:1.9rem;opacity:.4;}
+.co-title{font-size:.88rem;color:var(--muted);}
+.co-label{font-size:.63rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
+
+/* empty */
+.empty{text-align:center;padding:56px 20px;display:none;}
+.empty.show{display:block;}
+.ei{font-size:2.8rem;opacity:.3;margin-bottom:10px;}
+.et{color:var(--muted);font-size:.88rem;}
+
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid rgba(200,160,90,.3);border-radius:40px;padding:11px 26px;font-size:.85rem;color:var(--accent2);box-shadow:0 12px 40px rgba(0,0,0,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:9998;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.error{color:#ff8080;border-color:rgba(200,0,0,.3);}
+
+/* modal / game viewer */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{width:100%;max-width:1000px;height:90vh;background:var(--bg2);border:1px solid var(--border);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes popIn{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+.modal-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.modal-title{font-size:.9rem;color:var(--text);font-weight:600;display:flex;align-items:center;gap:8px;}
+.modal-actions{display:flex;gap:8px;}
+.modal-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.modal-btn:hover{border-color:rgba(200,160,90,.3);color:var(--accent);}
+.modal-btn.close-btn:hover{border-color:rgba(200,0,0,.4);color:#ff8080;}
+.modal-frame{flex:1;border:none;background:#fff;}
+
+/* delete btn on card */
+.del-btn{position:absolute;bottom:10px;left:10px;background:rgba(139,0,0,.25);border:1px solid rgba(139,0,0,.35);border-radius:8px;padding:4px 10px;color:#ff8080;font-size:.65rem;cursor:pointer;opacity:0;transition:all .2s;font-family:'Tajawal',sans-serif;z-index:2;}
+.gc:hover .del-btn{opacity:1;}
+.del-btn:hover{background:rgba(139,0,0,.5);}
+
+/* howto */
+.howto{margin-top:60px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;animation:fadeU .6s .4s ease both;}
+.howto-title{font-family:'Amiri',serif;font-size:1.4rem;color:var(--accent);margin-bottom:26px;text-align:center;}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:22px;}
+.step{text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px;}
+.snum{width:42px;height:42px;border-radius:50%;background:var(--adim);border:1px solid rgba(200,160,90,.22);display:flex;align-items:center;justify-content:center;font-family:'Amiri',serif;font-size:1.2rem;color:var(--accent);}
+.stitle{font-size:.88rem;font-weight:600;}
+.sdesc{font-size:.77rem;color:var(--muted);line-height:1.75;}
+.scode{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:monospace;font-size:.76rem;color:var(--accent2);width:100%;word-break:break-all;}
+
+/* footer */
+.footer{margin-top:70px;padding-top:28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;opacity:.4;}
+.fbrand{font-family:'Amiri',serif;font-size:1.05rem;color:var(--accent);}
+.ftext{font-size:.73rem;color:var(--muted);}
+
+/* animations */
+@keyframes fadeD{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeU{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* responsive */
+@media(max-width:680px){.featured{grid-template-columns:1fr;}.fart{min-height:175px;}.fgrad{background:linear-gradient(transparent 55%,var(--surface));}.hero-nums{gap:24px;}.uform{grid-template-columns:1fr;}.howto{padding:22px 16px;}.uactions{flex-direction:column;}}
+@media(max-width:460px){.grid{grid-template-columns:1fr;}.hero{padding:44px 0 34px;}.controls{flex-direction:column;}.sw{min-width:unset;}}
+</style>
+</head>
+<body>
+<div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- Game Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-bar">
+      <div class="modal-title">🎮 <span id="modal-game-title">جاري التحميل...</span></div>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="openFullscreen()">⛶ ملء الشاشة</button>
+        <button class="modal-btn close-btn" onclick="closeModal()">✕ إغلاق</button>
+      </div>
+    </div>
+    <iframe class="modal-frame" id="game-frame" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-badge">✦ مكتبة الروايات التفاعلية ✦</div>
+    <h1 class="hero-title">اختر قصتك<br><span>وعِش التجربة</span></h1>
+    <p class="hero-desc">روايات تفاعلية احترافية بالعربية — قراراتك تشكّل القصة، وصوتك يسردها لك</p>
+    <div class="hero-nums">
+      <div class="hnum"><span class="hnum-n" id="total-count">2</span><span class="hnum-l">رواية</span></div>
+      <div class="hnum"><span class="hnum-n" id="scene-count">+120</span><span class="hnum-l">مشهداً</span></div>
+      <div class="hnum"><span class="hnum-n">🎙️</span><span class="hnum-l">صوت عربي</span></div>
+    </div>
+    <div class="hero-line"><span></span>✦<span></span></div>
+  </header>
+
+  <!-- SEARCH -->
+  <div class="controls">
+    <div class="sw">
+      <span class="si">🔍</span>
+      <input class="search" type="text" placeholder="ابحث عن رواية..." id="search-inp" oninput="filterAll()">
+    </div>
+    <div class="filters">
+      <button class="fb on" onclick="setFilter('all',this)">الكل</button>
+      <button class="fb" onclick="setFilter('مغامرة',this)">🗺️ مغامرة</button>
+      <button class="fb" onclick="setFilter('رعب',this)">👻 رعب</button>
+      <button class="fb" onclick="setFilter('جريمة',this)">🔍 جريمة</button>
+      <button class="fb" onclick="setFilter('خيال',this)">🚀 خيال علمي</button>
+    </div>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="sh"><h2>✦ مختارة لك</h2><div class="ln"></div><span class="ct">أحدث إضافة</span></div>
+  <div class="featured" id="featured-card" onclick="openGame('horror-mystery.html','الغرفة ٢١٣')">
+    <div class="fart">
+      <svg viewBox="0 0 550 270" xmlns="http://www.w3.org/2000/svg">
+        <rect width="550" height="270" fill="#04040a"/>
+        <rect width="550" height="155" fill="#060610"/>
+        <circle cx="460" cy="48" r="30" fill="#101018" opacity=".9"/>
+        <circle cx="453" cy="44" r="26" fill="#060610"/>
+        <rect x="120" y="68" width="310" height="202" fill="#0a0a16" rx="2"/>
+        <rect x="120" y="68" width="310" height="10" fill="#14121e"/>
+        <rect x="145" y="92" width="24" height="30" fill="#1a1200" rx="1"/>
+        <rect x="190" y="92" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="235" y="92" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="280" y="92" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="325" y="92" width="24" height="30" fill="#120a00" rx="1"/>
+        <rect x="370" y="92" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="235" y="136" width="24" height="30" fill="#1a0000" rx="1"/>
+        <rect x="236" y="137" width="22" height="28" fill="#0d0000" rx="1"/>
+        <text x="242" y="156" fill="#660000" font-family="monospace" font-size="9" font-weight="bold">213</text>
+        <ellipse cx="247" cy="167" rx="17" ry="5" fill="#110000" opacity=".7"/>
+        <rect x="145" y="136" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="190" y="136" width="24" height="30" fill="#1a1a00" rx="1"/>
+        <rect x="280" y="136" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="325" y="136" width="24" height="30" fill="#0a0810" rx="1"/>
+        <rect x="370" y="136" width="24" height="30" fill="#100800" rx="1"/>
+        <rect x="253" y="220" width="44" height="50" fill="#060610" rx="2"/>
+        <line x1="275" y1="220" x2="275" y2="270" stroke="#0e0e1a" stroke-width="1"/>
+        <ellipse cx="275" cy="265" rx="190" ry="12" fill="#0a0a14" opacity=".8"/>
+        <line x1="80" y1="18" x2="75" y2="58" stroke="#0f1828" stroke-width=".8" opacity=".5"/>
+        <line x1="160" y1="8" x2="155" y2="52" stroke="#0f1828" stroke-width=".8" opacity=".5"/>
+        <line x1="320" y1="4" x2="315" y2="48" stroke="#0f1828" stroke-width=".8" opacity=".5"/>
+        <line x1="430" y1="14" x2="425" y2="58" stroke="#0f1828" stroke-width=".8" opacity=".5"/>
+        <rect x="240" y="139" width="8" height="22" fill="#030305" opacity=".9"/>
+        <circle cx="244" cy="136" r="5" fill="#030305" opacity=".9"/>
+        <circle cx="241" cy="134" r="1.2" fill="#330000" opacity=".7"/>
+        <circle cx="247" cy="134" r="1.2" fill="#330000" opacity=".7"/>
+      </svg>
+      <div class="fgrad"></div>
+      <div class="fbadge">جديد</div>
+    </div>
+    <div class="finfo">
+      <div class="fgenre">👻 رعب وجريمة</div>
+      <div class="ftitle">الغرفة ٢١٣</div>
+      <div class="fdesc">محقق متقاعد، فندق مظلم، وجثة في غرفة مقفلة من الداخل. الليلة ستكشف سراً أكبر من مجرد جريمة قتل.</div>
+      <div class="fmeta">
+        <div class="fmc">🎭 49 مشهداً</div>
+        <div class="fmc">⏱️ 45-60 دقيقة</div>
+        <div class="fmc">🎙️ سرد صوتي</div>
+      </div>
+      <div class="fplay">العب الآن ←</div>
+    </div>
+  </div>
+
+  <!-- ALL GAMES -->
+  <div class="sh"><h2>جميع الروايات</h2><div class="ln"></div><span class="ct" id="vis-count">2 روايات</span></div>
+  <div class="empty" id="empty"><div class="ei">🔍</div><div class="et">لا توجد روايات تطابق بحثك</div></div>
+
+  <div class="grid" id="grid">
+
+    <!-- Island Adventure -->
+    <div class="gc" data-genres="مغامرة" data-title="كنز الجزيرة المنسية" data-file="island-adventure.html" onclick="openGame('island-adventure.html','كنز الجزيرة المنسية')">
+      <div class="cart">
+        <svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="165" fill="#020d18"/>
+          <rect y="88" width="320" height="77" fill="#030e1a"/>
+          <circle cx="160" cy="58" r="38" fill="#1a0d00" opacity=".8"/>
+          <circle cx="160" cy="58" r="30" fill="#0d0800"/>
+          <ellipse cx="160" cy="97" rx="190" ry="19" fill="#0a0600" opacity=".5"/>
+          <ellipse cx="160" cy="102" rx="85" ry="21" fill="#0a1a08"/>
+          <rect x="157" y="56" width="6" height="48" fill="#0d1a08" rx="2"/>
+          <ellipse cx="146" cy="60" rx="20" ry="9" fill="#101e0a" transform="rotate(-18,146,60)"/>
+          <ellipse cx="174" cy="58" rx="20" ry="9" fill="#0e1c08" transform="rotate(18,174,58)"/>
+          <ellipse cx="160" cy="56" rx="16" ry="7" fill="#121e0a"/>
+          <polygon points="44,86 82,86 78,97 48,97" fill="#0e0e1a"/>
+          <rect x="60" y="74" width="2" height="13" fill="#141418"/>
+          <polygon points="52,74 63,74 58,80" fill="#181828"/>
+          <circle cx="48" cy="18" r="1.5" fill="#1a1a28"/>
+          <circle cx="115" cy="9" r="1" fill="#1a1a28"/>
+          <circle cx="250" cy="13" r="1.5" fill="#1a1a28"/>
+          <circle cx="295" cy="28" r="1" fill="#1a1a28"/>
+          <path d="M0,116 q18,-5 36,0 q18,5 36,0 q18,-5 36,0 q18,5 36,0 q18,-5 36,0 q18,5 36,0 q18,-5 36,0 q18,5 36,0" fill="none" stroke="#040e18" stroke-width="2"/>
+        </svg>
+        <div class="cag"></div>
+        <div class="gtag t-adv">مغامرة</div>
+      </div>
+      <div class="cbody">
+        <div class="ctitle">كنز الجزيرة المنسية</div>
+        <div class="cdesc">والدك محاصر في جزيرة مخفية. اجمع الأختام الثلاثة وأنقذه قبل فوات الأوان.</div>
+        <div class="cfoot">
+          <div class="cmeta"><div class="cmi">🗺️ 80 مشهداً</div><div class="cmi">⏱️ 60-90 د</div></div>
+          <div class="cplay">العب <span>←</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Horror Mystery -->
+    <div class="gc" data-genres="رعب جريمة" data-title="الغرفة 213" data-file="horror-mystery.html" onclick="openGame('horror-mystery.html','الغرفة ٢١٣')">
+      <div class="cart">
+        <svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="165" fill="#040408"/>
+          <polygon points="0,0 320,0 320,165 0,165" fill="#060610"/>
+          <polygon points="0,0 320,0 215,58 105,58" fill="#08081a"/>
+          <polygon points="0,165 320,165 215,107 105,107" fill="#07071a"/>
+          <polygon points="0,0 105,58 105,107 0,165" fill="#0a0a1a"/>
+          <polygon points="320,0 215,58 215,107 320,165" fill="#0a0a1a"/>
+          <rect x="20" y="63" width="28" height="42" fill="#060618" rx="1" stroke="#0f0f22" stroke-width="1"/>
+          <rect x="272" y="63" width="28" height="42" fill="#060618" rx="1" stroke="#0f0f22" stroke-width="1"/>
+          <rect x="130" y="65" width="60" height="42" fill="#0a0010" rx="1" stroke="#2a0010" stroke-width="1.5"/>
+          <text x="148" y="89" fill="#550010" font-family="monospace" font-size="10" font-weight="bold">2 1 3</text>
+          <ellipse cx="160" cy="108" rx="38" ry="6" fill="#180008" opacity=".6"/>
+          <rect x="148" y="0" width="28" height="7" fill="#101028" rx="2"/>
+          <ellipse cx="162" cy="32" rx="55" ry="26" fill="#0c0c20" opacity=".5"/>
+          <rect x="155" y="77" width="10" height="28" fill="#020204" opacity=".95" rx="1"/>
+          <circle cx="160" cy="73" r="7" fill="#020204" opacity=".95"/>
+          <circle cx="156" cy="71" r="1.5" fill="#330000" opacity=".7"/>
+          <circle cx="164" cy="71" r="1.5" fill="#330000" opacity=".7"/>
+        </svg>
+        <div class="cag"></div>
+        <div class="gtag t-hor">رعب</div>
+        <div class="nbadge">جديد</div>
+      </div>
+      <div class="cbody">
+        <div class="ctitle">الغرفة ٢١٣</div>
+        <div class="cdesc">جثة في غرفة مقفلة من الداخل. محقق يتقاعد ومنظمة سرية تراقب كل خطواتك.</div>
+        <div class="cfoot">
+          <div class="cmeta"><div class="cmi">🔍 49 مشهداً</div><div class="cmi">⏱️ 45-60 د</div></div>
+          <div class="cplay">العب <span>←</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coming soon -->
+    <div class="coming" data-genres="coming" data-title=""><div class="co-icon">🌲</div><div class="co-title">الغابة الصامتة</div><div class="co-label">قريباً • رعب</div></div>
+    <div class="coming" data-genres="coming" data-title=""><div class="co-icon">🚀</div><div class="co-title">محطة الفضاء X-9</div><div class="co-label">قريباً • خيال علمي</div></div>
+    <div class="coming" data-genres="coming" data-title=""><div class="co-icon">🏰</div><div class="co-title">مملكة الظلال</div><div class="co-label">قريباً • فانتازيا</div></div>
+
+  </div>
+
+  <!-- ── UPLOAD SECTION ── -->
+  <div class="upload-section">
+    <div class="upload-box">
+      <div class="upload-head" onclick="toggleUpload()">
+        <div class="upload-head-left">
+          <div class="upload-head-icon">📤</div>
+          <div class="upload-head-text">
+            <h3>أضف رواية جديدة</h3>
+            <p>ارفع ملف HTML وأضفه للمكتبة فوراً</p>
+          </div>
+        </div>
+        <div class="upload-toggle" id="utoggle">▼</div>
+      </div>
+      <div class="upload-body" id="upload-body">
+
+        <!-- Drop zone -->
+        <div class="dropzone" id="dropzone">
+          <input type="file" accept=".html,.htm" id="file-input" onchange="onFileSelect(event)">
+          <div class="dz-icon">📄</div>
+          <div class="dz-title">اسحب ملف HTML هنا</div>
+          <div class="dz-sub">أو <span>انقر للاختيار</span> — ملفات .html فقط</div>
+        </div>
+
+        <!-- File preview -->
+        <div class="file-preview" id="file-preview">
+          <div class="fp-icon">📄</div>
+          <div class="fp-info">
+            <div class="fp-name" id="fp-name">—</div>
+            <div class="fp-size" id="fp-size">—</div>
+          </div>
+          <button class="fp-remove" onclick="clearFile()">✕</button>
+        </div>
+
+        <!-- Form -->
+        <div class="uform">
+          <div class="ufield">
+            <div class="ulabel">اسم الرواية *</div>
+            <input class="uinput" id="u-title" type="text" placeholder="مثال: كنز الصحراء">
+          </div>
+          <div class="ufield">
+            <div class="ulabel">النوع *</div>
+            <select class="uselect" id="u-genre">
+              <option value="مغامرة">🗺️ مغامرة</option>
+              <option value="رعب">👻 رعب</option>
+              <option value="جريمة">🔍 جريمة</option>
+              <option value="خيال">🚀 خيال علمي</option>
+              <option value="فانتازيا">🐉 فانتازيا</option>
+              <option value="غموض">🌙 غموض</option>
+            </select>
+          </div>
+          <div class="ufield">
+            <div class="ulabel">عدد المشاهد</div>
+            <input class="uinput" id="u-scenes" type="number" placeholder="مثال: 40" min="1">
+          </div>
+          <div class="ufield">
+            <div class="ulabel">وقت اللعب التقديري</div>
+            <input class="uinput" id="u-time" type="text" placeholder="مثال: 30-45 دقيقة">
+          </div>
+          <div class="ufield full">
+            <div class="ulabel">وصف قصير *</div>
+            <textarea class="utextarea" id="u-desc" placeholder="اكتب وصفاً مختصراً للرواية يشوّق القارئ..."></textarea>
+          </div>
+          <div class="uactions">
+            <button class="ubtn cancel" onclick="clearForm()">إلغاء</button>
+            <button class="ubtn" onclick="addGame()">✦ إضافة للمكتبة</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- HOWTO -->
+  <div class="howto">
+    <div class="howto-title">🌐 كيف تنشر مكتبتك على الإنترنت مجاناً؟</div>
+    <div class="steps">
+      <div class="step"><div class="snum">١</div><div class="stitle">أنشئ حساباً في GitHub</div><div class="sdesc">سجّل مجاناً في github.com لحفظ ملفاتك</div></div>
+      <div class="step"><div class="snum">٢</div><div class="stitle">ارفع ملفاتك</div><div class="sdesc">أنشئ مستودعاً وارفع index.html وملفات الألعاب</div><div class="scode">index.html<br>island-adventure.html<br>horror-mystery.html</div></div>
+      <div class="step"><div class="snum">٣</div><div class="stitle">فعّل GitHub Pages</div><div class="sdesc">الإعدادات → Pages → اختر الفرع الرئيسي → احفظ</div></div>
+      <div class="step"><div class="snum">٤</div><div class="stitle">مكتبتك حية!</div><div class="sdesc">رابط تشاركه مع الجميع</div><div class="scode">username.github.io/games</div></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="fbrand">✦ مكتبة الروايات التفاعلية</div>
+    <div class="ftext">مبني بـ HTML · CSS · JavaScript · Web Speech API</div>
+  </footer>
+</div>
+
+<script>
+// ══════════════════════════
+//  STATE
+// ══════════════════════════
+let activeFilter = 'all';
+let selectedFile = null;
+let uploadedGames = JSON.parse(localStorage.getItem('uploaded_games') || '[]');
+
+// ══════════════════════════
+//  MODAL / GAME PLAYER
+// ══════════════════════════
+function openGame(src, title) {
+  // check if it's a blob URL (uploaded) or regular file
+  document.getElementById('modal-game-title').textContent = title;
+  const frame = document.getElementById('game-frame');
+  frame.src = src;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('game-frame').src = '';
+  document.body.style.overflow = '';
+}
+
+function openFullscreen() {
+  const frame = document.getElementById('game-frame');
+  if (frame.requestFullscreen) frame.requestFullscreen();
+  else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ══════════════════════════
+//  UPLOAD TOGGLE
+// ══════════════════════════
+function toggleUpload() {
+  const body = document.getElementById('upload-body');
+  const tog  = document.getElementById('utoggle');
+  body.classList.toggle('open');
+  tog.classList.toggle('open');
+}
+
+// ══════════════════════════
+//  FILE HANDLING
+// ══════════════════════════
+const dropzone = document.getElementById('dropzone');
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault(); dropzone.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+
+function onFileSelect(e) {
+  const f = e.target.files[0];
+  if (f) handleFile(f);
+}
+
+function handleFile(f) {
+  if (!f.name.endsWith('.html') && !f.name.endsWith('.htm')) {
+    showToast('⚠️ الملف يجب أن يكون بصيغة HTML', true);
+    return;
+  }
+  selectedFile = f;
+  document.getElementById('fp-name').textContent = f.name;
+  document.getElementById('fp-size').textContent = formatSize(f.size);
+  document.getElementById('file-preview').classList.add('show');
+
+  // auto fill title from filename
+  if (!document.getElementById('u-title').value) {
+    const name = f.name.replace(/\.html?$/i, '').replace(/[-_]/g, ' ');
+    document.getElementById('u-title').value = name;
+  }
+}
+
+function formatSize(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(1) + ' MB';
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-preview').classList.remove('show');
+}
+
+function clearForm() {
+  clearFile();
+  document.getElementById('u-title').value = '';
+  document.getElementById('u-desc').value = '';
+  document.getElementById('u-scenes').value = '';
+  document.getElementById('u-time').value = '';
+}
+
+// ══════════════════════════
+//  ADD GAME
+// ══════════════════════════
+function addGame() {
+  const title  = document.getElementById('u-title').value.trim();
+  const genre  = document.getElementById('u-genre').value;
+  const desc   = document.getElementById('u-desc').value.trim();
+  const scenes = document.getElementById('u-scenes').value.trim();
+  const time   = document.getElementById('u-time').value.trim();
+
+  if (!title) { showToast('⚠️ الرجاء كتابة اسم الرواية', true); return; }
+  if (!desc)  { showToast('⚠️ الرجاء كتابة وصف للرواية', true); return; }
+  if (!selectedFile) { showToast('⚠️ الرجاء اختيار ملف HTML', true); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const blobURL = URL.createObjectURL(new Blob([e.target.result], {type:'text/html'}));
+
+    const game = {
+      id: Date.now(),
+      title, genre, desc,
+      scenes: scenes || '—',
+      time:   time   || '—',
+      blobURL,
+      fileName: selectedFile.name,
+      addedAt: new Date().toLocaleDateString('ar-SA'),
+      isNew: true,
+    };
+
+    uploadedGames.push(game);
+    saveGames();
+    renderUploadedCard(game);
+    updateCounts();
+    clearForm();
+    showToast('✦ تمت إضافة "' + title + '" للمكتبة!');
+
+    // close upload panel
+    document.getElementById('upload-body').classList.remove('open');
+    document.getElementById('utoggle').classList.remove('open');
+
+    // scroll to new card
+    setTimeout(() => {
+      const newCard = document.querySelector('[data-id="' + game.id + '"]');
+      if (newCard) newCard.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 400);
+  };
+  reader.readAsText(selectedFile);
+}
+
+function saveGames() {
+  // save metadata only (not blob URLs — they're session-only)
+  const meta = uploadedGames.map(g => ({
+    id: g.id, title: g.title, genre: g.genre, desc: g.desc,
+    scenes: g.scenes, time: g.time, fileName: g.fileName, addedAt: g.addedAt,
+    isNew: g.isNew,
+  }));
+  try { localStorage.setItem('uploaded_games_meta', JSON.stringify(meta)); } catch(e) {}
+}
+
+// ══════════════════════════
+//  RENDER UPLOADED CARD
+// ══════════════════════════
+const genreEmoji = { مغامرة:'🗺️', رعب:'👻', جريمة:'🔍', خيال:'🚀', فانتازيا:'🐉', غموض:'🌙' };
+const genreTagClass = { مغامرة:'t-adv', رعب:'t-hor', جريمة:'t-hor', خيال:'t-sci', فانتازيا:'t-fan', غموض:'t-mys' };
+
+function getGenreArt(genre) {
+  const arts = {
+    مغامرة: `<svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="165" fill="#020d18"/><rect y="88" width="320" height="77" fill="#030e1a"/><circle cx="160" cy="58" r="38" fill="#1a0d00" opacity=".8"/><circle cx="160" cy="58" r="30" fill="#0d0800"/><ellipse cx="160" cy="102" rx="85" ry="21" fill="#0a1a08"/><rect x="157" y="56" width="6" height="48" fill="#0d1a08" rx="2"/><ellipse cx="146" cy="60" rx="20" ry="9" fill="#101e0a" transform="rotate(-18,146,60)"/><ellipse cx="174" cy="58" rx="20" ry="9" fill="#0e1c08" transform="rotate(18,174,58)"/><ellipse cx="160" cy="56" rx="16" ry="7" fill="#121e0a"/></svg>`,
+    رعب: `<svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="165" fill="#040408"/><polygon points="0,0 320,0 215,58 105,58" fill="#08081a"/><polygon points="0,165 320,165 215,107 105,107" fill="#07071a"/><polygon points="0,0 105,58 105,107 0,165" fill="#0a0a1a"/><polygon points="320,0 215,58 215,107 320,165" fill="#0a0a1a"/><rect x="130" y="65" width="60" height="42" fill="#0a0010" rx="1" stroke="#2a0010" stroke-width="1.5"/><text x="148" y="89" fill="#550010" font-family="monospace" font-size="10" font-weight="bold">? ? ?</text><rect x="148" y="0" width="28" height="7" fill="#101028" rx="2"/><ellipse cx="162" cy="32" rx="55" ry="26" fill="#0c0c20" opacity=".5"/></svg>`,
+    جريمة: `<svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="165" fill="#05080d"/><rect x="150" y="0" width="180" height="6" fill="#0e1420" rx="1"/><ellipse cx="240" cy="30" rx="110" ry="28" fill="#0c1220" opacity=".7"/><rect x="60" y="140" width="200" height="14" fill="#0a0e18" rx="2"/><rect x="250" y="60" width="40" height="50" fill="#0a0c14" stroke="#1a1a28" stroke-width="1"/><rect x="200" y="55" width="40" height="50" fill="#0a0c14" stroke="#1a1a28" stroke-width="1" transform="rotate(-3,220,80)"/><line x1="270" y1="110" x2="220" y2="105" stroke="#2a0000" stroke-width="1" opacity=".6"/><ellipse cx="150" cy="210" rx="35" ry="7" fill="#000" opacity=".7"/><rect x="130" y="148" width="38" height="62" fill="#060810" rx="3" opacity=".9"/><circle cx="149" cy="140" r="15" fill="#060810" opacity=".9"/></svg>`,
+    خيال: `<svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="165" fill="#030510"/><circle cx="160" cy="82" r="50" fill="#050820" opacity=".8" stroke="#0a1040" stroke-width="1"/><circle cx="160" cy="82" r="35" fill="#040618"/><ellipse cx="160" cy="82" rx="60" ry="20" fill="none" stroke="#0a1835" stroke-width="2"/><rect x="152" y="55" width="16" height="55" fill="#060920" rx="2"/><rect x="140" y="68" width="40" height="8" fill="#080b22" rx="1"/><circle cx="48" cy="18" r="2" fill="#141428"/><circle cx="115" cy="8" r="1.5" fill="#141428"/><circle cx="250" cy="12" r="2" fill="#141428"/><circle cx="295" cy="27" r="1" fill="#141428"/><circle cx="200" cy="40" r="1.5" fill="#141428"/></svg>`,
+    فانتازيا: `<svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="165" fill="#040810"/><polygon points="120,140 160,30 200,140" fill="#0a0e1a" stroke="#101830" stroke-width="1"/><polygon points="60,140 100,50 140,140" fill="#080c18" stroke="#0c1428" stroke-width="1"/><polygon points="180,140 220,50 260,140" fill="#080c18" stroke="#0c1428" stroke-width="1"/><circle cx="160" cy="28" r="10" fill="#0f1a10" opacity=".8"/><circle cx="100" cy="48" r="7" fill="#0f1a10" opacity=".6"/><circle cx="220" cy="48" r="7" fill="#0f1a10" opacity=".6"/></svg>`,
+    غموض: `<svg viewBox="0 0 320 165" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="165" fill="#060410"/><circle cx="160" cy="82" r="55" fill="#080614" opacity=".9" stroke="#120a20" stroke-width="1"/><circle cx="160" cy="82" r="35" fill="#060410"/><line x1="160" y1="27" x2="160" y2="137" stroke="#0e0818" stroke-width="1"/><line x1="105" y1="82" x2="215" y2="82" stroke="#0e0818" stroke-width="1"/><circle cx="160" cy="82" r="5" fill="#1a0a28"/><circle cx="48" cy="18" r="2" fill="#100a1e"/><circle cx="280" cy="35" r="1.5" fill="#100a1e"/><circle cx="30" cy="140" r="2" fill="#100a1e"/></svg>`,
+  };
+  return arts[genre] || arts['غموض'];
+}
+
+function renderUploadedCard(game) {
+  const grid = document.getElementById('grid');
+  const comingCards = grid.querySelectorAll('.coming');
+
+  const card = document.createElement('div');
+  card.className = 'gc';
+  card.setAttribute('data-genres', game.genre);
+  card.setAttribute('data-title', game.title);
+  card.setAttribute('data-id', game.id);
+  card.setAttribute('data-blob', game.blobURL || '');
+  card.onclick = function(e) {
+    if (e.target.classList.contains('del-btn')) return;
+    openGame(this.dataset.blob || game.blobURL, game.title);
+  };
+
+  const tagClass = genreTagClass[game.genre] || 't-mys';
+  const emoji    = genreEmoji[game.genre]    || '📖';
+
+  card.innerHTML = `
+    <div class="cart">
+      ${getGenreArt(game.genre)}
+      <div class="cag"></div>
+      <div class="gtag ${tagClass}">${emoji} ${game.genre}</div>
+      ${game.isNew ? '<div class="nbadge">جديد</div>' : ''}
+    </div>
+    <div class="cbody">
+      <div class="ctitle">${game.title}</div>
+      <div class="cdesc">${game.desc}</div>
+      <div class="cfoot">
+        <div class="cmeta">
+          ${game.scenes !== '—' ? `<div class="cmi">🎭 ${game.scenes} مشهداً</div>` : ''}
+          ${game.time   !== '—' ? `<div class="cmi">⏱️ ${game.time}</div>` : ''}
+        </div>
+        <div class="cplay">العب <span>←</span></div>
+      </div>
+    </div>
+    <button class="del-btn" onclick="deleteGame(${game.id}, event)">🗑️ حذف</button>
+  `;
+
+  // insert before coming-soon cards
+  if (comingCards.length > 0) {
+    grid.insertBefore(card, comingCards[0]);
+  } else {
+    grid.appendChild(card);
+  }
+
+  // animate in
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(20px) scale(.96)';
+  card.style.transition = 'opacity .4s ease, transform .4s ease, box-shadow .3s, border-color .3s';
+  requestAnimationFrame(() => { card.style.opacity='1'; card.style.transform='translateY(0) scale(1)'; });
+}
+
+function deleteGame(id, e) {
+  e.stopPropagation();
+  if (!confirm('هل تريد حذف هذه الرواية من المكتبة؟')) return;
+  uploadedGames = uploadedGames.filter(g => g.id !== id);
+  saveGames();
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (card) {
+    card.style.transition = 'all .35s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(.9)';
+    setTimeout(() => { card.remove(); updateCounts(); filterAll(); }, 350);
+  }
+  showToast('تم حذف الرواية');
+}
+
+// ══════════════════════════
+//  FILTER & SEARCH
+// ══════════════════════════
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  filterAll();
+}
+
+function filterAll() {
+  const q = document.getElementById('search-inp').value.trim().toLowerCase();
+  const cards = document.querySelectorAll('#grid .gc');
+  let vis = 0;
+  cards.forEach(c => {
+    const genres = (c.dataset.genres || '').toLowerCase();
+    const title  = (c.dataset.title  || '').toLowerCase();
+    const mf = activeFilter === 'all' || genres.includes(activeFilter);
+    const ms = !q || title.includes(q);
+    const show = mf && ms;
+    c.classList.toggle('hide', !show);
+    if (show) vis++;
+  });
+
+  // coming cards
+  document.querySelectorAll('#grid .coming').forEach(c => {
+    c.classList.toggle('hide', activeFilter !== 'all' || q.length > 0);
+  });
+
+  document.getElementById('vis-count').textContent = vis + ' روايات';
+  document.getElementById('empty').classList.toggle('show', vis === 0 && q.length > 0);
+}
+
+function updateCounts() {
+  const total = document.querySelectorAll('#grid .gc').length;
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('vis-count').textContent = total + ' روايات';
+}
+
+// ══════════════════════════
+//  TOAST
+// ══════════════════════════
+let toastTO;
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (err ? ' error' : '') + ' show';
+  clearTimeout(toastTO);
+  toastTO = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════
+//  INIT — restore session blobs won't survive reload
+//  so we note that uploaded games need re-upload
+// ══════════════════════════
+function init() {
+  // load saved metadata (for display only — blob URLs are gone on reload)
+  const meta = JSON.parse(localStorage.getItem('uploaded_games_meta') || '[]');
+  if (meta.length > 0) {
+    meta.forEach(g => {
+      // create a placeholder card that prompts re-upload
+      g.blobURL = null;
+      renderRestoredCard(g);
+    });
+    updateCounts();
+  }
+
+  // animate built-in cards
+  document.querySelectorAll('#grid .gc, #grid .coming').forEach((c, i) => {
+    c.style.opacity = '0';
+    c.style.transform = 'translateY(18px)';
+    c.style.transition = `opacity .5s ${i*.07}s ease, transform .5s ${i*.07}s ease, box-shadow .3s, border-color .3s`;
+    setTimeout(() => { c.style.opacity='1'; c.style.transform='translateY(0)'; }, 50);
+  });
+}
+
+function renderRestoredCard(game) {
+  const grid = document.getElementById('grid');
+  const comingCards = grid.querySelectorAll('.coming');
+  const card = document.createElement('div');
+  card.className = 'gc';
+  card.setAttribute('data-genres', game.genre);
+  card.setAttribute('data-title', game.title);
+  card.setAttribute('data-id', game.id);
+  card.onclick = function(e) {
+    if (e.target.classList.contains('del-btn')) return;
+    showToast('⚠️ أعد تحميل الملف — الروايات المرفوعة تحتاج إعادة رفع بعد تحديث الصفحة', true);
+    setTimeout(() => {
+      document.getElementById('upload-body').classList.add('open');
+      document.getElementById('utoggle').classList.add('open');
+      document.querySelector('.upload-section').scrollIntoView({behavior:'smooth'});
+    }, 800);
+  };
+
+  const tagClass = genreTagClass[game.genre] || 't-mys';
+  const emoji    = genreEmoji[game.genre]    || '📖';
+
+  card.innerHTML = `
+    <div class="cart" style="opacity:.6">
+      ${getGenreArt(game.genre)}
+      <div class="cag"></div>
+      <div class="gtag ${tagClass}">${emoji} ${game.genre}</div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);font-size:.7rem;color:#aaa;">⚠️ أعد الرفع</div>
+    </div>
+    <div class="cbody">
+      <div class="ctitle">${game.title}</div>
+      <div class="cdesc">${game.desc}</div>
+      <div class="cfoot">
+        <div class="cmeta">
+          <div class="cmi" style="color:#c08050">⚠️ يحتاج إعادة رفع</div>
+        </div>
+        <div class="cplay">رفع <span>↑</span></div>
+      </div>
+    </div>
+    <button class="del-btn" onclick="deleteGame(${game.id}, event)">🗑️ حذف</button>
+  `;
+
+  if (comingCards.length > 0) grid.insertBefore(card, comingCards[0]);
+  else grid.appendChild(card);
+}
+
+init();
+</script>
+</body>
+</html>
